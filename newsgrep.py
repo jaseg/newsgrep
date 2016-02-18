@@ -25,7 +25,7 @@ def cut_and_cull(text, leftmost=0, rightmost=0, tolerance=3):
     return ' '.join(words[:leftmost] + ['[...]'] + words[-rightmost:])
 
 def highlight_match(searchre, text, hlext=9, tol=5, sep=['[...]']):
-    text = searchre.sub('\033[93m\\g<0>\033[0m', text)
+    text = searchre.sub('\033[91m\\g<0>\033[0m', text)
 
     sentences = text.split('.')
     hlstate = False
@@ -38,7 +38,7 @@ def highlight_match(searchre, text, hlext=9, tol=5, sep=['[...]']):
         wkeep = [False] * len(words)
 
         for j, w in enumerate(words):
-            if '\033[93m' in w:
+            if '\033[91m' in w:
                 hlstate = True
             wkeep[j] = hlstate
             if '\033[0m' in w:
@@ -121,13 +121,15 @@ for res in grequests.map((grequests.get(url) for url in FEEDS), exception_handle
         ce, desc = item.find('content:encoded'), item.find('description')
         title, date = item.find('title').text, item.find('pubdate').text
         text = str(ce.text) if ce else str(desc.text)
-        #HACKHACKHACK
-        if 'faz' in link or  'zeit' in link: # some people just can't standards
+        #HACKSHACKSHACKS
+        if 'faz' in res.url or  'zeit' in res.url: # some people just can't standards
             text = bs4.BeautifulSoup(text, 'lxml').text
+        if 'welt' in res.url: # …and some people just can't sane
+            link = str(item.find('link').next_sibling).split()[0]
 
-        print('In:   \033[92m{}\033[0m'.format(title))
-        print('Link: \033[92m{}\033[0m'.format(link))
-        print('Date: \033[92m{}\033[0m'.format(humanize.naturaltime(date)))
+        print('In:   \033[93m{}\033[0m'.format(title))
+        print('Link: \033[93m{}\033[0m'.format(link))
+        print('Date: \033[93m{}\033[0m'.format(humanize.naturaltime(date)))
         print(highlight_match(searchre, text))
         print()
     print()
